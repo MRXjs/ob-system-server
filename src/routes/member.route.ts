@@ -1,12 +1,17 @@
-import express from 'express';
-import { addMember, deleteMember, getAllMember, updateMember } from '../controllers/member.controller';
-import { isAuthenticated } from '../middleware/auth';
+import express from 'express'
+import {
+    addMember,
+    deleteMember,
+    getAllMember,
+    updateMember,
+} from '../controllers/member.controller'
+import { isAuthenticated } from '../middleware/auth'
 
-const memberRouter = express.Router();
+const memberRouter = express.Router()
 
-memberRouter.get('/members', isAuthenticated, getAllMember);
-memberRouter.post('/add-member', isAuthenticated, addMember);
-memberRouter.put('/update-member/:member_id', isAuthenticated, updateMember);
-memberRouter.delete('/delete-member/:member_id', isAuthenticated, deleteMember);
+memberRouter.get('/members', isAuthenticated, getAllMember)
+memberRouter.post('/add-member', isAuthenticated, addMember)
+memberRouter.put('/update-member/:member_id', isAuthenticated, updateMember)
+memberRouter.delete('/delete-member/:member_id', isAuthenticated, deleteMember)
 
-export default memberRouter;
+export default memberRouter
