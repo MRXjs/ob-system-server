@@ -7,6 +7,9 @@ import memberRouter from './routes/member.route'
 import meetingRouter from './routes/meeting.route'
 import membershipFeeRoute from './routes/membershipFee.route'
 import eventRouter from './routes/event.route'
+import meetingInvolveRoute from './routes/meetingInvolve.route'
+import paidMemberRoute from './routes/paidMember.route'
+import eventContributeRoute from './routes/eventContribute.route'
 
 const app = express()
 
@@ -20,7 +23,17 @@ app.use(cors())
 app.use(cookieParser())
 
 // routes
-app.use('/api/v1', adminRouter, memberRouter, meetingRouter, membershipFeeRoute, eventRouter)
+app.use(
+    '/api/v1',
+    adminRouter,
+    memberRouter,
+    meetingRouter,
+    membershipFeeRoute,
+    eventRouter,
+    meetingInvolveRoute,
+    paidMemberRoute,
+    eventContributeRoute,
+)
 
 const port = 5000 || process.env.PORT
 
