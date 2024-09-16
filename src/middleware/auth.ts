@@ -9,7 +9,6 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
     const jwtSecret = process.env.JWT_SECRETE as string
     jwt.verify(token, jwtSecret, (err: any, userInfo: any) => {
         if (err) return res.status(403).json({ success: false, message: 'Token is not valid!' })
-
         // req.userInfo = userInfo;
         next()
     })

@@ -17,7 +17,12 @@ const app = express()
 app.use(express.json({ limit: '50mb' }))
 
 // cors
-app.use(cors())
+app.use(
+    cors({
+        origin: process.env.LOCAL_ORIGIN,
+        credentials: true,
+    }),
+)
 
 // cookie parser
 app.use(cookieParser())

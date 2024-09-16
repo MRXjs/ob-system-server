@@ -12,6 +12,16 @@ export const getAllMember = (req: Request, res: Response, next: NextFunction) =>
     })
 }
 
+// get member count
+export const getMemberCount = (req: Request, res: Response, next: NextFunction) => {
+    db.query('SELECT COUNT(*) FROM member', (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        const rowCount = data[0]['COUNT(*)']
+        return res.status(200).json({ success: true, rowCount })
+    })
+}
+
 // add member
 export const addMember = (req: Request, res: Response, next: NextFunction) => {
     const member: Member = req.body

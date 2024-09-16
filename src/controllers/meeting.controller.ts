@@ -9,6 +9,16 @@ export const getAllMeetings = (req: Request, res: Response, next: NextFunction) 
     })
 }
 
+// get meeting count
+export const getMeetingCount = (req: Request, res: Response, next: NextFunction) => {
+    db.query('SELECT COUNT(*) FROM meeting', (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        const rowCount = data[0]['COUNT(*)']
+        return res.status(200).json({ success: true, rowCount })
+    })
+}
+
 // create meeting
 export const createMeeting = (req: Request, res: Response, next: NextFunction) => {
     const { date, description } = req.body

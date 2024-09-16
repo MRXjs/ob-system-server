@@ -11,6 +11,16 @@ export const getAllEvents = (req: Request, res: Response, next: NextFunction) =>
     })
 }
 
+// get event count
+export const getEventCount = (req: Request, res: Response, next: NextFunction) => {
+    db.query('SELECT COUNT(*) FROM event', (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        const rowCount = data[0]['COUNT(*)']
+        return res.status(200).json({ success: true, rowCount })
+    })
+}
+
 // create event
 export const createEvent = (req: Request, res: Response, next: NextFunction) => {
     const { date, name, description } = req.body
