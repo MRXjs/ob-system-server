@@ -8,7 +8,28 @@ export const getAllMember = (req: Request, res: Response, next: NextFunction) =>
     db.query('SELECT * FROM member', (err: any, data: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
 
-        return res.status(200).json({ success: true, data })
+        const memberData = data.map((member: any) => {
+            return {
+                memberId: member.member_id,
+                fullName: member.full_name,
+                yearOfJoingSchool: member.year_of_joing_school,
+                yearOfOutSchool: member.year_of_out_school,
+                facebookName: member.facebook_name,
+                studyPeriod:
+                    member.year_of_joing_school && member.year_of_out_school
+                        ? `${member.year_of_joing_school}-${member.year_of_out_school}`
+                        : '',
+                phoneNumber: member.phone_number,
+                address: member.address,
+                job: member.job,
+                jobPosition: member.job_position,
+                dob: member.dob,
+                gender: member.gender,
+                civilStatus: member.civil_status,
+                whatsappNumber: member.whatsapp_number,
+            }
+        })
+        return res.status(200).json({ success: true, memberData })
     })
 }
 
@@ -84,5 +105,23 @@ export const deleteMember = (req: Request, res: Response, next: NextFunction) =>
         }
 
         return res.status(200).json({ success: true, message: 'Member deleted successfully' })
+    })
+}
+
+// Get member gender percentages
+export const getGenderPercentages = (req: Request, res: Response, next: NextFunction) => {
+    const query = `SELECT gender, COUNT(*) AS count, (COUNT(*) / (SELECT COUNT(*) FROM member)) * 100 AS percentage FROM member WHERE gender IN ('male', 'female') GROUP BY gender;`
+
+    db.query(query, (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        const genderData: any = {}
+        data.forEach((item: any) => {
+            genderData[item.gender] = {
+                count: item.count,
+                percentage: item.percentage,
+            }
+        })
+        return res.status(200).json({ success: true, genderData })
     })
 }
