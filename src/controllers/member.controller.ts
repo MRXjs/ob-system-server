@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { db } from '../utils/db'
-import { getMemberValues } from '../utils/fuctions'
+import { formatMemberData, getMemberValues } from '../utils/fuctions'
 import { Member } from '../utils/types'
 
 // get all members
@@ -8,28 +8,29 @@ export const getAllMember = (req: Request, res: Response, next: NextFunction) =>
     db.query('SELECT * FROM member', (err: any, data: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
 
-        const memberData = data.map((member: any) => {
-            return {
-                memberId: member.member_id,
-                fullName: member.full_name,
-                yearOfJoingSchool: member.year_of_joing_school,
-                yearOfOutSchool: member.year_of_out_school,
-                facebookName: member.facebook_name,
-                studyPeriod:
-                    member.year_of_joing_school && member.year_of_out_school
-                        ? `${member.year_of_joing_school}-${member.year_of_out_school}`
-                        : '',
-                phoneNumber: member.phone_number,
-                address: member.address,
-                job: member.job,
-                jobPosition: member.job_position,
-                dob: member.dob,
-                gender: member.gender,
-                civilStatus: member.civil_status,
-                whatsappNumber: member.whatsapp_number,
-            }
-        })
+        const memberData = data.map(formatMemberData)
+
         return res.status(200).json({ success: true, memberData })
+    })
+}
+
+// Get member by id
+export const getMemberById = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id } = req.params
+    const query = 'SELECT * FROM member WHERE member_id = ?'
+
+    db.query(query, [member_id], (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        console.log(data)
+
+        const memberData = data.map(formatMemberData)
+
+        if (!memberData[0]) {
+            return res.status(404).json({ success: false, message: 'Member not found' })
+        }
+
+        return res.status(200).json({ success: true, member: memberData[0] })
     })
 }
 
@@ -50,7 +51,7 @@ export const addMember = (req: Request, res: Response, next: NextFunction) => {
     const query = `
     INSERT INTO member (
         member_id, full_name, year_of_joing_school, year_of_out_school, 
-        facebook_name, phone_number, address, job_position, job, 
+        facebook_name, phone_number, address, workplace, job, 
         dob, gender, civil_status, whatsapp_number
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
@@ -93,7 +94,6 @@ export const updateMember = (req: Request, res: Response, next: NextFunction) =>
 // delete member
 export const deleteMember = (req: Request, res: Response, next: NextFunction) => {
     const { member_id } = req.params
-
     const query = 'DELETE FROM member WHERE member_id = ?'
     const values = [member_id]
 
