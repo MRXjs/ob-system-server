@@ -22,8 +22,6 @@ export const getMemberById = (req: Request, res: Response, next: NextFunction) =
     db.query(query, [member_id], (err: any, data: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
 
-        console.log(data)
-
         const memberData = data.map(formatMemberData)
 
         if (!memberData[0]) {

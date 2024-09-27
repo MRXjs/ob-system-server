@@ -7,7 +7,7 @@ export const getMembershipFees = (req: Request, res: Response, next: NextFunctio
 
     db.query(query, (err: any, data: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
-        return res.status(200).json({ success: true, data })
+        return res.status(200).json({ success: true, feesData: data })
     })
 }
 

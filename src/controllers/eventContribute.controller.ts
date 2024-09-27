@@ -1,6 +1,27 @@
 import { NextFunction, Request, Response } from 'express'
 import { db } from '../utils/db'
 
+// get all event contributes by event id
+export const getAllEventContributesByEId = (req: Request, res: Response, next: NextFunction) => {
+    const { event_id } = req.params
+    const query = `
+        SELECT 
+            ec.*, 
+            m.full_name,m.member_id
+        FROM 
+            event_contribute ec
+        INNER JOIN 
+            member m ON ec.member_id = m.member_id
+        WHERE 
+            ec.event_id = ?
+    `
+
+    db.query(query, [event_id], (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+        return res.status(200).json({ success: true, eventContributes: data })
+    })
+}
+
 // get all event contributes
 export const getAllEventContribute = (req: Request, res: Response, next: NextFunction) => {
     db.query('SELECT * FROM event_contribute', (err: any, data: any) => {
@@ -41,5 +62,22 @@ export const deleteEventContribute = (req: Request, res: Response, next: NextFun
         return res
             .status(200)
             .json({ success: true, message: 'Event contributes deleted successfully' })
+    })
+}
+
+// Mark attendance by meeting_id and member_id
+export const eventContributeMark = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id, event_id, status } = req.body
+
+    const query = `UPDATE event_contribute SET status = ? WHERE member_id = ? AND event_id = ?`
+
+    db.query(query, [status, member_id, event_id], (err: any, result: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Record not found' })
+        }
+
+        return res.status(200).json({ success: true, message: 'Attendance marked successfully' })
     })
 }

@@ -5,7 +5,7 @@ import { db } from '../utils/db'
 export const getAllMeetings = (req: Request, res: Response, next: NextFunction) => {
     db.query('SELECT * FROM meeting', (err: any, data: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
-        return res.status(200).json({ success: true, data })
+        return res.status(200).json({ success: true, meetingData: data })
     })
 }
 
@@ -25,10 +25,28 @@ export const createMeeting = (req: Request, res: Response, next: NextFunction) =
 
     const query = `INSERT INTO meeting (date, description) VALUES (?, ?)`
 
-    db.query(query, [date, description], (err: any, result: any) => {
+    db.query(query, [date, description], (err: any, meetingResult: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
 
-        return res.status(201).json({ success: true, message: 'Meeting create successfully' })
+        const meetingId = meetingResult.insertId
+
+        db.query('SELECT member_id FROM member', (err: any, memberResult: any) => {
+            if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+            let memberIds: number[] = memberResult.map((member: any) => member.member_id)
+
+            const involveQuery =
+                'INSERT INTO meeting_involve (member_id, meeting_id, status) VALUES ?'
+
+            const involveValues = memberIds.map((memberId: number) => [memberId, meetingId, false])
+
+            db.query(involveQuery, [involveValues], (err: any, involveResult: any) => {
+                if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+                return res
+                    .status(201)
+                    .json({ success: true, message: 'Meeting created successfully' })
+            })
+        })
     })
 }
 
@@ -62,11 +80,9 @@ export const updateMeeting = (req: Request, res: Response, next: NextFunction) =
 // delete meeting
 export const deleteMeeting = (req: Request, res: Response, next: NextFunction) => {
     const { meeting_id } = req.params
+    const deleteMeetingQuery = 'DELETE FROM meeting WHERE meeting_id = ?'
 
-    const query = 'DELETE FROM meeting WHERE meeting_id = ?'
-    const values = [meeting_id]
-
-    db.query(query, values, (err: any, result: any) => {
+    db.query(deleteMeetingQuery, [meeting_id], (err: any, result: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
 
         if (result.affectedRows === 0) {

@@ -7,7 +7,7 @@ export const getAllEvents = (req: Request, res: Response, next: NextFunction) =>
     const query = 'SELECT * FROM event'
     db.query(query, (err: any, data: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
-        return res.status(200).json({ success: true, data })
+        return res.status(200).json({ success: true, eventData: data })
     })
 }
 
@@ -21,6 +21,14 @@ export const getEventCount = (req: Request, res: Response, next: NextFunction) =
     })
 }
 
+export const getLatestEvents = (req: Request, res: Response, next: NextFunction) => {
+    const query = 'SELECT * FROM event ORDER BY date DESC LIMIT 3'
+
+    db.query(query, (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+        return res.status(200).json({ success: true, eventData: data })
+    })
+}
 // create event
 export const createEvent = (req: Request, res: Response, next: NextFunction) => {
     const { date, name, description } = req.body
@@ -28,7 +36,25 @@ export const createEvent = (req: Request, res: Response, next: NextFunction) => 
 
     db.query(query, [date, name, description], (err: any, result: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
-        return res.status(201).json({ success: true, message: 'Event create successfully' })
+
+        const eventId = result.insertId
+        db.query('SELECT member_id FROM member', (err: any, memberResult: any) => {
+            if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+            let memberIds: number[] = memberResult.map((member: any) => member.member_id)
+
+            const contributeQuery =
+                'INSERT INTO event_contribute (member_id, event_id, status) VALUES ?'
+
+            const involveValues = memberIds.map((memberId: number) => [memberId, eventId, false])
+
+            db.query(contributeQuery, [involveValues], (err: any, involveResult: any) => {
+                if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+                return res
+                    .status(201)
+                    .json({ success: true, message: 'Meeting created successfully' })
+            })
+        })
     })
 }
 
