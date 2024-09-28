@@ -80,3 +80,43 @@ export const paidMemberMark = (req: Request, res: Response, next: NextFunction) 
             .json({ success: true, message: 'Paid Mark or unmarked successfully' })
     })
 }
+
+// Get member membership paid percentage by member_id
+export const paidPercentage = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id } = req.params
+
+    const query = `
+        SELECT 
+            COUNT(pm.fee_id) AS totalFees,
+            SUM(CASE WHEN pm.status = 1 THEN 1 ELSE 0 END) AS paidFees
+        FROM 
+            paid_member pm
+        WHERE 
+            pm.member_id = ?
+    `
+
+    db.query(query, [member_id], (err: any, result: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (result.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: 'No paid data found for this member' })
+        }
+
+        const totalFees = result[0].totalFees || 0
+        const paidFees = result[0].paidFees || 0
+
+        const paidPercentage = totalFees > 0 ? Math.round((paidFees / totalFees) * 100) : 0
+
+        return res.status(200).json({
+            success: true,
+            paidPercentageData: {
+                member_id,
+                totalFees,
+                paidFees,
+                paidPercentage,
+            },
+        })
+    })
+}

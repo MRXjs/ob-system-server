@@ -92,3 +92,38 @@ export const deleteMeeting = (req: Request, res: Response, next: NextFunction) =
         return res.status(200).json({ success: true, message: 'Meeting deleted successfully' })
     })
 }
+
+// Get last five meeting attendance percentage
+export const getMeetingAttendancePercentage = (req: Request, res: Response, next: NextFunction) => {
+    // Query to get the last five meetings
+    const query = `
+        SELECT 
+            m.meeting_id, 
+            m.date, 
+            SUM(CASE WHEN mi.status = 1 THEN 1 ELSE 0 END) AS present,
+            SUM(CASE WHEN mi.status = 0 THEN 1 ELSE 0 END) AS absent,
+            COUNT(mi.member_id) AS total
+        FROM 
+            meeting m
+        INNER JOIN 
+            meeting_involve mi ON m.meeting_id = mi.meeting_id
+        GROUP BY 
+            m.meeting_id
+        ORDER BY 
+            m.date DESC
+        LIMIT 5
+    `
+
+    db.query(query, (err: any, results: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        // Calculate percentage for each meeting
+        const attendanceData = results.map((meeting: any) => ({
+            date: meeting.date,
+            present: Math.round((meeting.present / meeting.total) * 100), // Calculate present percentage
+            absent: Math.round((meeting.absent / meeting.total) * 100), // Calculate absent percentage
+        }))
+
+        return res.status(200).json({ success: true, attendanceData })
+    })
+}

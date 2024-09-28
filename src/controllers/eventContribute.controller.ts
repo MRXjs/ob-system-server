@@ -83,3 +83,44 @@ export const eventContributeMark = (req: Request, res: Response, next: NextFunct
             .json({ success: true, message: 'Event contribute marked or unmarked successfully' })
     })
 }
+
+// Get member event contribute percentage by member_id
+export const contributePercentage = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id } = req.params
+
+    const query = `
+        SELECT 
+            COUNT(ec.event_id) AS totalEvents,
+            SUM(CASE WHEN ec.status = 1 THEN 1 ELSE 0 END) AS contributeEvents
+        FROM 
+            event_contribute ec
+        WHERE 
+            ec.member_id = ?
+    `
+
+    db.query(query, [member_id], (err: any, result: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (result.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: 'No contribute data found for this member' })
+        }
+
+        const totalEvents = result[0].totalEvents || 0
+        const contributeEvents = result[0].contributeEvents || 0
+
+        const contributePercentage =
+            totalEvents > 0 ? Math.round((contributeEvents / totalEvents) * 100) : 0
+
+        return res.status(200).json({
+            success: true,
+            contributePercentageData: {
+                member_id,
+                totalEvents,
+                contributeEvents,
+                contributePercentage,
+            },
+        })
+    })
+}

@@ -2,6 +2,7 @@ import express from 'express'
 import { isAuthenticated } from '../middleware/auth'
 import {
     attendanceMark,
+    attendancePercentage,
     createMeetingInvolve,
     deleteMeetingInvolve,
     getAllMeetingInvolvesBymId,
@@ -17,5 +18,10 @@ meetingInvolveRoute.get(
 meetingInvolveRoute.post('/create-meeting-involve', isAuthenticated, createMeetingInvolve)
 meetingInvolveRoute.delete('/delete-meeting-involve', isAuthenticated, deleteMeetingInvolve)
 meetingInvolveRoute.put('/meeting-attendance-mark', isAuthenticated, attendanceMark)
+meetingInvolveRoute.get(
+    '/member-meeting-attendance-percentage/:member_id',
+    isAuthenticated,
+    attendancePercentage,
+)
 
 export default meetingInvolveRoute

@@ -76,3 +76,46 @@ export const attendanceMark = (req: Request, res: Response, next: NextFunction) 
             .json({ success: true, message: 'Attendance mark or unmarked  successfully' })
     })
 }
+
+// Get member meeting attendance percentage by member_id
+export const attendancePercentage = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id } = req.params
+
+    // Query to get total meetings and present count for the member
+    const query = `
+        SELECT 
+            COUNT(mi.meeting_id) AS totalMeetings,
+            SUM(CASE WHEN mi.status = 1 THEN 1 ELSE 0 END) AS presentMeetings
+        FROM 
+            meeting_involve mi
+        WHERE 
+            mi.member_id = ?
+    `
+
+    db.query(query, [member_id], (err: any, result: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (result.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: 'No attendance data found for this member' })
+        }
+
+        const totalMeetings = result[0].totalMeetings || 0
+        const presentMeetings = result[0].presentMeetings || 0
+
+        // Calculate attendance percentage
+        const attendancePercentage =
+            totalMeetings > 0 ? Math.round((presentMeetings / totalMeetings) * 100) : 0
+
+        return res.status(200).json({
+            success: true,
+            attendancePercentageData: {
+                member_id,
+                totalMeetings,
+                presentMeetings,
+                attendancePercentage,
+            },
+        })
+    })
+}

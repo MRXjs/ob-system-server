@@ -6,6 +6,7 @@ import {
     getAllFeeMemberByfId,
     getAllPaidMember,
     paidMemberMark,
+    paidPercentage,
 } from '../controllers/paidMember.controller'
 
 const paidMemberRoute = express.Router()
@@ -15,5 +16,10 @@ paidMemberRoute.get('/paid-members', isAuthenticated, getAllPaidMember)
 paidMemberRoute.post('/add-paid-member', isAuthenticated, addPaidMember)
 paidMemberRoute.delete('/delete-paid-member', isAuthenticated, deletePaidMember)
 paidMemberRoute.put('/paid-member-mark', isAuthenticated, paidMemberMark)
+paidMemberRoute.get(
+    '/member-membership-paid-percentage/:member_id',
+    isAuthenticated,
+    paidPercentage,
+)
 
 export default paidMemberRoute

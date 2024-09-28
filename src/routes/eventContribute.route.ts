@@ -2,6 +2,7 @@ import express from 'express'
 import { isAuthenticated } from '../middleware/auth'
 import {
     addEventContribute,
+    contributePercentage,
     deleteEventContribute,
     eventContributeMark,
     getAllEventContribute,
@@ -19,5 +20,10 @@ eventContributeRoute.get('/event_contributes', isAuthenticated, getAllEventContr
 eventContributeRoute.post('/add-event_contribute', isAuthenticated, addEventContribute)
 eventContributeRoute.delete('/delete-event_contribute', isAuthenticated, deleteEventContribute)
 eventContributeRoute.put('/event-contribute-mark', isAuthenticated, eventContributeMark)
+eventContributeRoute.get(
+    '/member-event-contribute-percentage/:member_id',
+    isAuthenticated,
+    contributePercentage,
+)
 
 export default eventContributeRoute
