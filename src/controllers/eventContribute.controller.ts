@@ -78,6 +78,8 @@ export const eventContributeMark = (req: Request, res: Response, next: NextFunct
             return res.status(404).json({ success: false, message: 'Record not found' })
         }
 
-        return res.status(200).json({ success: true, message: 'Attendance marked successfully' })
+        return res
+            .status(200)
+            .json({ success: true, message: 'Event contribute marked or unmarked successfully' })
     })
 }

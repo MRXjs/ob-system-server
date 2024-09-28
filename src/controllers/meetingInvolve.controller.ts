@@ -71,6 +71,8 @@ export const attendanceMark = (req: Request, res: Response, next: NextFunction) 
             return res.status(404).json({ success: false, message: 'Record not found' })
         }
 
-        return res.status(200).json({ success: true, message: 'Attendance marked successfully' })
+        return res
+            .status(200)
+            .json({ success: true, message: 'Attendance mark or unmarked  successfully' })
     })
 }

@@ -52,7 +52,7 @@ export const createEvent = (req: Request, res: Response, next: NextFunction) => 
                 if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
                 return res
                     .status(201)
-                    .json({ success: true, message: 'Meeting created successfully' })
+                    .json({ success: true, message: 'Event created successfully' })
             })
         })
     })

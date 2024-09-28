@@ -1,6 +1,27 @@
 import { NextFunction, Request, Response } from 'express'
 import { db } from '../utils/db'
 
+export const getAllFeeMemberByfId = (req: Request, res: Response, next: NextFunction) => {
+    const { fee_id } = req.params
+
+    const query = `
+        SELECT 
+            pm.*, 
+            m.full_name,m.member_id
+        FROM 
+            paid_member pm
+        INNER JOIN 
+            member m ON pm.member_id = m.member_id
+        WHERE 
+            pm.fee_id = ?
+    `
+
+    db.query(query, [fee_id], (err: any, data: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+        return res.status(200).json({ success: true, feeMember: data })
+    })
+}
+
 // get all paid member
 export const getAllPaidMember = (req: Request, res: Response, next: NextFunction) => {
     db.query('SELECT * FROM paid_member', (err: any, data: any) => {
@@ -38,5 +59,24 @@ export const deletePaidMember = (req: Request, res: Response, next: NextFunction
         }
 
         return res.status(200).json({ success: true, message: 'Paid member deleted successfully' })
+    })
+}
+
+// paid member mark
+export const paidMemberMark = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id, fee_id, status } = req.body
+
+    const query = `UPDATE paid_member SET status = ? WHERE member_id = ? AND fee_id = ?`
+
+    db.query(query, [status, member_id, fee_id], (err: any, result: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Record not found' })
+        }
+
+        return res
+            .status(200)
+            .json({ success: true, message: 'Paid Mark or unmarked successfully' })
     })
 }

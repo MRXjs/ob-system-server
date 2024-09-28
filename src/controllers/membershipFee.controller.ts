@@ -28,9 +28,22 @@ export const createMembershipFee = (req: Request, res: Response, next: NextFunct
     const query = 'INSERT INTO membership_fee(date, fee, description) VALUES(?, ?, ?)'
 
     db.query(query, [date, fee, description], (err: any, result: any) => {
-        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+        const feeId = result.insertId
 
-        return res.status(201).json({ success: true, message: 'Member Fee create successfully' })
+        db.query('SELECT member_id FROM member', (err: any, memberResult: any) => {
+            if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+            let memberIds: number[] = memberResult.map((member: any) => member.member_id)
+
+            const paidQuery = 'INSERT INTO paid_member (member_id,fee_id, status) VALUES ?'
+
+            const paidValues = memberIds.map((memberId: number) => [memberId, feeId, false])
+
+            db.query(paidQuery, [paidValues], (err: any, involveResult: any) => {
+                if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+                return res.status(201).json({ success: true, message: 'Fee created successfully' })
+            })
+        })
     })
 }
 
