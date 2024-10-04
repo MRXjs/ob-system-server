@@ -7,6 +7,7 @@ import {
     eventContributeMark,
     getAllEventContribute,
     getAllEventContributesByEId,
+    getNotContributeEvents,
 } from '../controllers/eventContribute.controller'
 
 const eventContributeRoute = express.Router()
@@ -24,6 +25,11 @@ eventContributeRoute.get(
     '/member-event-contribute-percentage/:member_id',
     isAuthenticated,
     contributePercentage,
+)
+eventContributeRoute.get(
+    '/get-not-contribute-events/:member_id',
+    isAuthenticated,
+    getNotContributeEvents,
 )
 
 export default eventContributeRoute

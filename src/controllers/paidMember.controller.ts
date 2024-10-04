@@ -120,3 +120,34 @@ export const paidPercentage = (req: Request, res: Response, next: NextFunction) 
         })
     })
 }
+
+// Get all unpaid fees by member_id
+export const getUnpaidFees = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id } = req.params
+
+    const query = `
+    SELECT 
+        mf.fee_id, 
+        mf.date, 
+        mf.fee, 
+        mf.description 
+    FROM 
+        paid_member pm
+    INNER JOIN 
+        membership_fee mf ON pm.fee_id = mf.fee_id
+    WHERE 
+        pm.member_id = ? AND pm.status = 0
+    `
+
+    db.query(query, [member_id], (err: any, results: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (results.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: 'No Unpaid fee found for this member' })
+        }
+
+        return res.status(200).json({ success: true, feesData: results })
+    })
+}

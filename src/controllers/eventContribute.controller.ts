@@ -124,3 +124,33 @@ export const contributePercentage = (req: Request, res: Response, next: NextFunc
         })
     })
 }
+
+// Get all not contribute events by member_id
+export const getNotContributeEvents = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id } = req.params
+
+    const query = `
+    SELECT 
+        e.event_id, 
+        e.date, 
+        e.description 
+    FROM 
+        event_contribute ec
+    INNER JOIN 
+        event e ON ec.event_id = e.event_id
+    WHERE 
+        ec.member_id = ? AND ec.status = 0
+    `
+
+    db.query(query, [member_id], (err: any, results: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (results.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: 'No not contribute events found for this member' })
+        }
+
+        return res.status(200).json({ success: true, eventData: results })
+    })
+}

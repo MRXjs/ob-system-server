@@ -5,6 +5,7 @@ import {
     deletePaidMember,
     getAllFeeMemberByfId,
     getAllPaidMember,
+    getUnpaidFees,
     paidMemberMark,
     paidPercentage,
 } from '../controllers/paidMember.controller'
@@ -21,5 +22,6 @@ paidMemberRoute.get(
     isAuthenticated,
     paidPercentage,
 )
+paidMemberRoute.get('/get-unpaid-fees/:member_id', isAuthenticated, getUnpaidFees)
 
 export default paidMemberRoute

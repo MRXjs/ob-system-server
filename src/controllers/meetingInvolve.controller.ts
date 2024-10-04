@@ -119,3 +119,33 @@ export const attendancePercentage = (req: Request, res: Response, next: NextFunc
         })
     })
 }
+
+// Get all absent meetings by member_id
+export const getAbsentMeetings = (req: Request, res: Response, next: NextFunction) => {
+    const { member_id } = req.params
+
+    const query = `
+        SELECT 
+            m.meeting_id, 
+            m.date, 
+            m.description 
+        FROM 
+            meeting_involve mi
+        INNER JOIN 
+            meeting m ON mi.meeting_id = m.meeting_id
+        WHERE 
+            mi.member_id = ? AND mi.status = 0
+    `
+
+    db.query(query, [member_id], (err: any, results: any) => {
+        if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
+
+        if (results.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: 'No absent meetings found for this member' })
+        }
+
+        return res.status(200).json({ success: true, meetingData: results })
+    })
+}

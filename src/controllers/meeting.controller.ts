@@ -95,7 +95,6 @@ export const deleteMeeting = (req: Request, res: Response, next: NextFunction) =
 
 // Get last five meeting attendance percentage
 export const getMeetingAttendancePercentage = (req: Request, res: Response, next: NextFunction) => {
-    // Query to get the last five meetings
     const query = `
         SELECT 
             m.meeting_id, 
@@ -117,7 +116,6 @@ export const getMeetingAttendancePercentage = (req: Request, res: Response, next
     db.query(query, (err: any, results: any) => {
         if (err) return res.status(500).json({ success: false, message: err.sqlMessage })
 
-        // Calculate percentage for each meeting
         const attendanceData = results.map((meeting: any) => ({
             date: meeting.date,
             present: Math.round((meeting.present / meeting.total) * 100), // Calculate present percentage

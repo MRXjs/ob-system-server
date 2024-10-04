@@ -5,6 +5,7 @@ import {
     attendancePercentage,
     createMeetingInvolve,
     deleteMeetingInvolve,
+    getAbsentMeetings,
     getAllMeetingInvolvesBymId,
 } from '../controllers/meetingInvolve.controller'
 
@@ -23,5 +24,6 @@ meetingInvolveRoute.get(
     isAuthenticated,
     attendancePercentage,
 )
+meetingInvolveRoute.get('/get-absent-meetings/:member_id', isAuthenticated, getAbsentMeetings)
 
 export default meetingInvolveRoute
