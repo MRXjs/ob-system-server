@@ -66,7 +66,29 @@ export const updateMember = (req: Request, res: Response, next: NextFunction) =>
     const { member_id } = req.params
     const member: Member = req.body
 
-    console.log(member)
+    db.query(
+        'SELECT avatar FROM member WHERE member_id = ? ',
+        [member_id],
+        (err: any, result: any) => {
+            const fileName = result[0].avatar
+            if (fileName) {
+                const avatarPath = path.join(__dirname, '../../public/avatars', fileName)
+                // Check if the file exists
+                fs.access(avatarPath, fs.constants.F_OK, (err) => {
+                    if (!err) {
+                        // Delete the file
+                        fs.unlink(avatarPath, (err) => {
+                            if (err) {
+                                return res
+                                    .status(500)
+                                    .json({ success: false, message: 'Error deleting avatar' })
+                            }
+                        })
+                    }
+                })
+            }
+        },
+    )
 
     // Filter out undefined fields
     const fieldsToUpdate = (Object.keys(member) as (keyof Member)[]).filter(
